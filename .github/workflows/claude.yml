@@ -39,6 +39,7 @@ jobs:
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
           # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
@@ -59,7 +60,7 @@ jobs:
           # assignee_trigger: "claude-bot"
           
           # Optional: Allow Claude to run specific commands
-          allowed_tools: "Bash(*),Git(*),FileSystem(*)"
+          allowed_tools: "Bash(npm run test),Bash(npm run lint),Bash(npm run typecheck)"
           
           # Optional: Add custom instructions for Claude to customize its behavior for your project
           # custom_instructions: |
