@@ -1,0 +1,179 @@
+<%- include('../partials/header', {title: title}) %>
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0"><i class="bi bi-building"></i> <%= title %></h1>
+            <% if (user.role === 'Admin' || user.role === 'Manager') { %>
+                <a href="/units/add" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add Unit
+                </a>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6 class="card-title">Total Units</h6>
+                <h3 class="mb-0"><%= occupancyStats.total_units || 0 %></h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-title">Occupied</h6>
+                <h3 class="mb-0"><%= occupancyStats.occupied_units || 0 %></h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h6 class="card-title">Vacant</h6>
+                <h3 class="mb-0"><%= occupancyStats.vacant_units || 0 %></h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h6 class="card-title">Occupancy Rate</h6>
+                <h3 class="mb-0"><%= occupancyStats.occupancy_rate || 0 %>%</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" action="/units">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <select name="is_occupied" class="form-select">
+                                <option value="">All Units</option>
+                                <option value="1" <% if (filters.is_occupied === '1') { %>selected<% } %>>Occupied</option>
+                                <option value="0" <% if (filters.is_occupied === '0') { %>selected<% } %>>Vacant</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="housing_type_id" class="form-select">
+                                <option value="">All Types</option>
+                                <% if (housingTypes && housingTypes.length > 0) { %>
+                                    <% housingTypes.forEach(function(type) { %>
+                                        <option value="<%= type.id %>" 
+                                                <% if (filters.housing_type_id == type.id) { %>selected<% } %>>
+                                            <%= type.name %>
+                                        </option>
+                                    <% }); %>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" name="search" class="form-control" 
+                                   placeholder="Search units..." value="<%= filters.search || '' %>">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search"></i> Filter
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Units Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Unit #</th>
+                                <th>Type</th>
+                                <th>Details</th>
+                                <th>Rent</th>
+                                <th>Status</th>
+                                <th>Occupier</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (units && units.length > 0) { %>
+                                <% units.forEach(function(unit) { %>
+                                    <tr>
+                                        <td>
+                                            <a href="/units/view/<%= unit.id %>" class="text-decoration-none">
+                                                <strong><%= unit.unit_number %></strong>
+                                            </a>
+                                        </td>
+                                        <td><%= unit.housing_type_name %></td>
+                                        <td>
+                                            <%= unit.getUnitSummary() %>
+                                            <% if (unit.square_footage) { %>
+                                                <br><small class="text-muted"><%= unit.square_footage %> sq ft</small>
+                                            <% } %>
+                                        </td>
+                                        <td><%= unit.getFormattedRentalRate() %></td>
+                                        <td>
+                                            <% if (unit.isOccupied()) { %>
+                                                <span class="badge bg-success">Occupied</span>
+                                            <% } else { %>
+                                                <span class="badge bg-warning">Vacant</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <% if (unit.occupier_name) { %>
+                                                <%= unit.occupier_name %>
+                                            <% } else { %>
+                                                <span class="text-muted">No occupier</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="/units/view/<%= unit.id %>" class="btn btn-sm btn-outline-info">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <% if (user.role === 'Admin' || user.role === 'Manager') { %>
+                                                    <a href="/units/edit/<%= unit.id %>" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <% if (!unit.isOccupied()) { %>
+                                                        <form method="POST" action="/units/delete/<%= unit.id %>" class="d-inline">
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                                    onclick="return confirm('Are you sure you want to delete this unit?')">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    <% } %>
+                                                <% } %>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">No units found.</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,122 @@
+<%- include('../partials/header', {title: title}) %>
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0"><i class="bi bi-person-gear"></i> <%= title %></h1>
+            <a href="/users" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Users
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <!-- Validation Errors -->
+                <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            <% errors.forEach(function(error) { %>
+                                <li><%= error.msg %></li>
+                            <% }); %>
+                        </ul>
+                    </div>
+                <% } %>
+
+                <form method="POST" action="<%= action %>">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="first_name" class="form-label">First Name *</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" 
+                                       value="<%= user.first_name || '' %>" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="last_name" class="form-label">Last Name *</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" 
+                                       value="<%= user.last_name || '' %>" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username *</label>
+                                <input type="text" class="form-control" id="username" name="username" 
+                                       value="<%= user.username || '' %>" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="<%= user.email || '' %>" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="password" class="form-label">
+                                    Password <% if (typeof isEdit !== 'undefined' && isEdit) { %>(leave blank to keep current)<% } else { %>*<% } %>
+                                </label>
+                                <input type="password" class="form-control" id="password" name="password" 
+                                       <% if (typeof isEdit === 'undefined' || !isEdit) { %>required<% } %>>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="role_id" class="form-label">Role *</label>
+                                <select class="form-select" id="role_id" name="role_id" required>
+                                    <option value="">Select a role</option>
+                                    <% if (roles && roles.length > 0) { %>
+                                        <% roles.forEach(function(role) { %>
+                                            <option value="<%= role.id %>" 
+                                                    <% if (user.role_id == role.id) { %>selected<% } %>>
+                                                <%= role.name %>
+                                            </option>
+                                        <% }); %>
+                                    <% } %>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                                           value="1" <% if (user.is_active !== 0) { %>checked<% } %>>
+                                    <label class="form-check-label" for="is_active">
+                                        Active User
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="/users" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <% if (typeof isEdit !== 'undefined' && isEdit) { %>
+                                <i class="bi bi-save"></i> Update User
+                            <% } else { %>
+                                <i class="bi bi-plus-circle"></i> Create User
+                            <% } %>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
