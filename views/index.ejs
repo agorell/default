@@ -1,0 +1,244 @@
+<%- include('partials/header', {title: title}) %>
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0"><i class="bi bi-speedometer2"></i> Dashboard</h1>
+            <div class="text-muted">
+                Welcome back, <%= user.firstName %> <%= user.lastName %>!
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Total Units</h6>
+                        <h3 class="mb-0"><%= occupancyStats.total_units || 0 %></h3>
+                    </div>
+                    <div class="text-white-50">
+                        <i class="bi bi-building" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Occupied</h6>
+                        <h3 class="mb-0"><%= occupancyStats.occupied_units || 0 %></h3>
+                    </div>
+                    <div class="text-white-50">
+                        <i class="bi bi-people" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Vacant</h6>
+                        <h3 class="mb-0"><%= occupancyStats.vacant_units || 0 %></h3>
+                    </div>
+                    <div class="text-white-50">
+                        <i class="bi bi-house-door" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Occupancy Rate</h6>
+                        <h3 class="mb-0"><%= occupancyStats.occupancy_rate || 0 %>%</h3>
+                    </div>
+                    <div class="text-white-50">
+                        <i class="bi bi-graph-up" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Notes -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0"><i class="bi bi-journal-text"></i> Recent Notes</h5>
+                <a href="/notes" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <% if (recentNotes && recentNotes.length > 0) { %>
+                    <% recentNotes.forEach(function(note) { %>
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h6 class="mb-1">
+                                    <a href="/notes/view/<%= note.id %>" class="text-decoration-none">
+                                        <%= note.title %>
+                                    </a>
+                                </h6>
+                                <small class="text-muted">
+                                    <span class="badge <%= note.getCategoryBadgeClass() %>"><%= note.category %></span>
+                                    <% if (note.unit_number) { %>
+                                        Unit <%= note.unit_number %>
+                                    <% } %>
+                                </small>
+                                <p class="text-muted mb-0 small"><%= note.getTruncatedContent(80) %></p>
+                            </div>
+                            <small class="text-muted"><%= note.getFormattedCreatedDate() %></small>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <p class="text-muted">No recent notes available.</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Vacant Units -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0"><i class="bi bi-house-door"></i> Vacant Units</h5>
+                <a href="/units?is_occupied=0" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <% if (vacantUnits && vacantUnits.length > 0) { %>
+                    <% vacantUnits.slice(0, 5).forEach(function(unit) { %>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h6 class="mb-1">
+                                    <a href="/units/view/<%= unit.id %>" class="text-decoration-none">
+                                        Unit <%= unit.unit_number %>
+                                    </a>
+                                </h6>
+                                <small class="text-muted">
+                                    <%= unit.housing_type_name %> • <%= unit.getUnitSummary() %>
+                                    <% if (unit.rental_rate) { %>
+                                        • <%= unit.getFormattedRentalRate() %>/month
+                                    <% } %>
+                                </small>
+                            </div>
+                            <% if (user.role === 'Admin' || user.role === 'Manager') { %>
+                                <a href="/occupiers/add?unit_id=<%= unit.id %>" class="btn btn-sm btn-success">
+                                    <i class="bi bi-person-plus"></i> Add Occupier
+                                </a>
+                            <% } %>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <p class="text-muted">All units are currently occupied.</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% if (upcomingRenewals && upcomingRenewals.length > 0) { %>
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-calendar-event"></i> Upcoming Lease Renewals</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Occupier</th>
+                                <th>Unit</th>
+                                <th>Lease Start</th>
+                                <th>Renewal Due</th>
+                                <th>Monthly Rent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% upcomingRenewals.forEach(function(occupier) { %>
+                                <tr>
+                                    <td>
+                                        <a href="/occupiers/view/<%= occupier.id %>" class="text-decoration-none">
+                                            <%= occupier.getFullName() %>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="/units/view/<%= occupier.housing_unit_id %>" class="text-decoration-none">
+                                            Unit <%= occupier.unit_number %>
+                                        </a>
+                                    </td>
+                                    <td><%= occupier.getFormattedStartDate() %></td>
+                                    <td>
+                                        <% 
+                                            const renewalDate = new Date(occupier.occupancy_start_date);
+                                            renewalDate.setFullYear(renewalDate.getFullYear() + 1);
+                                        %>
+                                        <%= renewalDate.toLocaleDateString() %>
+                                    </td>
+                                    <td><%= occupier.getFormattedRent() %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<% } %>
+
+<% if (user.role === 'Admin' || user.role === 'Manager') { %>
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-plus-circle"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <a href="/units/add" class="btn btn-outline-primary w-100 mb-2">
+                            <i class="bi bi-building-add"></i> Add Housing Unit
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/occupiers/add" class="btn btn-outline-success w-100 mb-2">
+                            <i class="bi bi-person-plus"></i> Add Occupier
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/notes/add" class="btn btn-outline-info w-100 mb-2">
+                            <i class="bi bi-journal-plus"></i> Add Note
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/reports" class="btn btn-outline-secondary w-100 mb-2">
+                            <i class="bi bi-graph-up"></i> View Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<% } %>
+
+<%- include('partials/footer') %>

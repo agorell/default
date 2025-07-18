@@ -1,0 +1,97 @@
+<%- include('../partials/header', {title: title}) %>
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0"><i class="bi bi-person-gear"></i> <%= title %></h1>
+            <a href="/users/add" class="btn btn-primary">
+                <i class="bi bi-person-plus"></i> Add User
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (users && users.length > 0) { %>
+                                <% users.forEach(function(user) { %>
+                                    <tr>
+                                        <td>
+                                            <a href="/users/profile/<%= user.id %>" class="text-decoration-none">
+                                                <%= user.getFullName() %>
+                                            </a>
+                                        </td>
+                                        <td><%= user.username %></td>
+                                        <td><%= user.email %></td>
+                                        <td>
+                                            <span class="badge bg-info"><%= user.role_name %></span>
+                                        </td>
+                                        <td>
+                                            <% if (user.isActive()) { %>
+                                                <span class="badge bg-success">Active</span>
+                                            <% } else { %>
+                                                <span class="badge bg-secondary">Inactive</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <% if (user.created_at) { %>
+                                                <%= new Date(user.created_at).toLocaleDateString() %>
+                                            <% } else { %>
+                                                N/A
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="/users/profile/<%= user.id %>" class="btn btn-sm btn-outline-info">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="/users/edit/<%= user.id %>" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <form method="POST" action="/users/toggle-status/<%= user.id %>" class="d-inline">
+                                                    <% if (user.isActive()) { %>
+                                                        <button type="submit" class="btn btn-sm btn-outline-warning" 
+                                                                onclick="return confirm('Are you sure you want to deactivate this user?')">
+                                                            <i class="bi bi-pause"></i>
+                                                        </button>
+                                                    <% } else { %>
+                                                        <button type="submit" class="btn btn-sm btn-outline-success" 
+                                                                onclick="return confirm('Are you sure you want to activate this user?')">
+                                                            <i class="bi bi-play"></i>
+                                                        </button>
+                                                    <% } %>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">No users found.</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
