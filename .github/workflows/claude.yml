@@ -29,6 +29,7 @@ jobs:
       packages: read
       deployments: write
       repository-projects: read
+      # Note: workflows permission cannot be granted to GitHub Apps for security
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
