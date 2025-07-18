@@ -26,7 +26,6 @@ jobs:
       actions: read
       checks: write             # Added - allows updating check runs
       statuses: write           # Added - allows updating commit statuses
-      metadata: read            # Added - allows reading repository metadata
       packages: read            # Added - allows reading packages (if needed)
       deployments: write        # Added - allows managing deployments (if needed)
     steps:
