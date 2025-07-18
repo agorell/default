@@ -1,0 +1,235 @@
+<%- include('../layout', { title: 'Notes' }) %>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="bi bi-journal-text"></i> Notes
+                    </h1>
+                    <p class="text-muted">Manage documentation and notes for units and occupiers</p>
+                </div>
+                <a href="/notes/add" class="btn btn-primary">
+                    <i class="bi bi-journal-plus"></i> Add Note
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filter-section">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label for="search" class="form-label">Search</label>
+                <input type="text" class="form-control search-box" id="search" name="search" 
+                       placeholder="Search notes..." value="<%= filters.search || '' %>">
+            </div>
+            
+            <div class="col-md-2">
+                <label for="category" class="form-label">Category</label>
+                <select class="form-select" id="category" name="category">
+                    <option value="">All Categories</option>
+                    <% categories.forEach(category => { %>
+                        <option value="<%= category %>" <%= filters.category === category ? 'selected' : '' %>>
+                            <%= category %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <label for="unit_id" class="form-label">Unit</label>
+                <select class="form-select" id="unit_id" name="unit_id">
+                    <option value="">All Units</option>
+                    <% housingUnits.forEach(unit => { %>
+                        <option value="<%= unit.id %>" <%= filters.unit_id == unit.id ? 'selected' : '' %>>
+                            <%= unit.unit_number %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <label for="occupier_id" class="form-label">Occupier</label>
+                <select class="form-select" id="occupier_id" name="occupier_id">
+                    <option value="">All Occupiers</option>
+                    <% occupiers.forEach(occupier => { %>
+                        <option value="<%= occupier.id %>" <%= filters.occupier_id == occupier.id ? 'selected' : '' %>>
+                            <%= occupier.first_name %> <%= occupier.last_name %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    <a href="/notes" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Clear
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Notes List -->
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-list"></i> Notes List
+                </h5>
+                <span class="badge bg-primary">
+                    <%= notes.length %> note<%= notes.length !== 1 ? 's' : '' %>
+                </span>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <% if (notes.length > 0) { %>
+                <div class="row">
+                    <% notes.forEach(note => { %>
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title">
+                                            <a href="/notes/view/<%= note.id %>" class="text-decoration-none">
+                                                <%= note.title %>
+                                            </a>
+                                        </h6>
+                                        <% if (note.category) { %>
+                                            <span class="badge bg-<%= note.getCategoryBadgeClass() %>">
+                                                <%= note.category %>
+                                            </span>
+                                        <% } %>
+                                    </div>
+                                    
+                                    <p class="card-text text-muted">
+                                        <%= note.getShortContent(100) %>
+                                    </p>
+                                    
+                                    <div class="mb-2">
+                                        <% if (note.unit_number) { %>
+                                            <span class="badge bg-primary me-1">
+                                                <i class="bi bi-building"></i> <%= note.unit_number %>
+                                            </span>
+                                        <% } %>
+                                        <% if (note.occupier_name) { %>
+                                            <span class="badge bg-success me-1">
+                                                <i class="bi bi-person"></i> <%= note.occupier_name %>
+                                            </span>
+                                        <% } %>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="bi bi-person-circle"></i> <%= note.created_by_name %>
+                                        </small>
+                                        <small class="text-muted">
+                                            <%= note.getFormattedDate() %>
+                                        </small>
+                                    </div>
+                                </div>
+                                
+                                <div class="card-footer bg-transparent">
+                                    <div class="d-flex justify-content-between">
+                                        <a href="/notes/view/<%= note.id %>" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                        
+                                        <div>
+                                            <% if (note.created_by === user.id || user.role_name === 'Admin') { %>
+                                                <a href="/notes/edit/<%= note.id %>" class="btn btn-sm btn-outline-warning">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                
+                                                <form method="POST" action="/notes/delete/<%= note.id %>" 
+                                                      class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                            title="Delete Note"
+                                                            data-confirm="Are you sure you want to delete this note?">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="text-center py-5">
+                    <i class="bi bi-journal-text text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3 text-muted">No notes found</h5>
+                    <p class="text-muted">
+                        <% if (filters.search || filters.category || filters.unit_id || filters.occupier_id) { %>
+                            Try adjusting your filters to see more results.
+                        <% } else { %>
+                            Get started by adding your first note.
+                        <% } %>
+                    </p>
+                    <a href="/notes/add" class="btn btn-primary">
+                        <i class="bi bi-journal-plus"></i> Add First Note
+                    </a>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Live search functionality
+    document.getElementById('search').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const cards = document.querySelectorAll('.card.h-100');
+        
+        cards.forEach(card => {
+            const text = card.textContent.toLowerCase();
+            const parent = card.closest('.col-md-6');
+            parent.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+    
+    // Category filter colors
+    document.addEventListener('DOMContentLoaded', function() {
+        const categoryBadges = document.querySelectorAll('.badge');
+        
+        categoryBadges.forEach(badge => {
+            const category = badge.textContent.trim();
+            
+            switch(category) {
+                case 'General':
+                    badge.classList.add('bg-primary');
+                    break;
+                case 'Maintenance':
+                    badge.classList.add('bg-warning');
+                    break;
+                case 'Financial':
+                    badge.classList.add('bg-success');
+                    break;
+                case 'Complaint':
+                    badge.classList.add('bg-danger');
+                    break;
+                case 'Inspection':
+                    badge.classList.add('bg-info');
+                    break;
+                default:
+                    badge.classList.add('bg-secondary');
+            }
+        });
+    });
+    
+    // Auto-refresh every 10 minutes to show new notes
+    setTimeout(() => {
+        if (document.visibilityState === 'visible') {
+            location.reload();
+        }
+    }, 600000);
+</script>

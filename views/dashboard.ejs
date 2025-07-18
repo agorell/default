@@ -1,0 +1,247 @@
+<%- include('layout', { title: 'Dashboard' }) %>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-0">
+                <i class="bi bi-house-door"></i> Dashboard
+            </h1>
+            <p class="text-muted">Welcome to the Housing Management System</p>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card">
+                <h2><%= occupancyStats.total_units %></h2>
+                <p><i class="bi bi-building"></i> Total Units</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card">
+                <h2><%= occupancyStats.occupied_units %></h2>
+                <p><i class="bi bi-people"></i> Occupied Units</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card">
+                <h2><%= occupancyStats.vacant_units %></h2>
+                <p><i class="bi bi-house"></i> Vacant Units</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card">
+                <h2><%= occupancyStats.occupancy_rate %>%</h2>
+                <p><i class="bi bi-bar-chart"></i> Occupancy Rate</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Additional Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-people"></i> Occupier Statistics
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <h4 class="text-primary"><%= occupierStats.total_occupiers %></h4>
+                            <small class="text-muted">Total Occupiers</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">$<%= occupierStats.average_rent ? parseFloat(occupierStats.average_rent).toFixed(2) : '0.00' %></h4>
+                            <small class="text-muted">Average Rent</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span>Monthly Revenue:</span>
+                        <strong class="text-success">$<%= occupierStats.total_monthly_revenue ? parseFloat(occupierStats.total_monthly_revenue).toFixed(2) : '0.00' %></strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-building"></i> Units by Type
+                </div>
+                <div class="card-body">
+                    <% if (typeStats.length > 0) { %>
+                        <% typeStats.forEach(type => { %>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span><%= type.housing_type %></span>
+                                <div>
+                                    <span class="badge bg-primary"><%= type.total_units %></span>
+                                    <small class="text-muted">(<%= type.occupied_units %> occupied)</small>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="text-muted">No housing types found</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-speedometer2"></i> Quick Actions
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <% if (user.role_name === 'Admin' || user.role_name === 'Manager') { %>
+                            <a href="/units/add" class="btn btn-primary btn-sm">
+                                <i class="bi bi-plus-circle"></i> Add Housing Unit
+                            </a>
+                            <a href="/occupiers/add" class="btn btn-success btn-sm">
+                                <i class="bi bi-person-plus"></i> Add Occupier
+                            </a>
+                        <% } %>
+                        <a href="/notes/add" class="btn btn-info btn-sm">
+                            <i class="bi bi-journal-plus"></i> Add Note
+                        </a>
+                        <a href="/reports" class="btn btn-warning btn-sm">
+                            <i class="bi bi-file-earmark-bar-graph"></i> View Reports
+                        </a>
+                        <% if (user.role_name === 'Admin') { %>
+                            <a href="/users/add" class="btn btn-secondary btn-sm">
+                                <i class="bi bi-person-gear"></i> Add User
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-journal-text"></i> Recent Notes
+                </div>
+                <div class="card-body">
+                    <% if (recentNotes.length > 0) { %>
+                        <% recentNotes.forEach(note => { %>
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="mb-1">
+                                        <a href="/notes/view/<%= note.id %>" class="text-decoration-none">
+                                            <%= note.title %>
+                                        </a>
+                                    </h6>
+                                    <p class="mb-1 text-muted small"><%= note.getShortContent(50) %></p>
+                                    <div class="d-flex align-items-center">
+                                        <% if (note.category) { %>
+                                            <span class="badge bg-<%= note.getCategoryBadgeClass() %> me-2">
+                                                <%= note.category %>
+                                            </span>
+                                        <% } %>
+                                        <% if (note.unit_number) { %>
+                                            <small class="text-muted">Unit: <%= note.unit_number %></small>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    <%= new Date(note.created_at).toLocaleDateString() %>
+                                </small>
+                            </div>
+                        <% }); %>
+                        <div class="text-center mt-3">
+                            <a href="/notes" class="btn btn-outline-primary btn-sm">View All Notes</a>
+                        </div>
+                    <% } else { %>
+                        <p class="text-muted">No recent notes</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-person-check"></i> Recent Move-ins
+                </div>
+                <div class="card-body">
+                    <% if (recentMoveIns.length > 0) { %>
+                        <% recentMoveIns.forEach(occupier => { %>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="mb-1">
+                                        <a href="/occupiers/view/<%= occupier.id %>" class="text-decoration-none">
+                                            <%= occupier.getFullName() %>
+                                        </a>
+                                    </h6>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-success me-2">Unit <%= occupier.unit_number %></span>
+                                        <small class="text-muted">
+                                            <%= occupier.getFormattedRent() %>/month
+                                        </small>
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    <%= occupier.getFormattedMoveInDate() %>
+                                </small>
+                            </div>
+                        <% }); %>
+                        <div class="text-center mt-3">
+                            <a href="/occupiers" class="btn btn-outline-primary btn-sm">View All Occupiers</a>
+                        </div>
+                    <% } else { %>
+                        <p class="text-muted">No recent move-ins</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- User Statistics (Admin Only) -->
+    <% if (user.role_name === 'Admin' && userCount > 0) { %>
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-people"></i> System Statistics
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h4 class="text-primary"><%= userCount %></h4>
+                            <small class="text-muted">Total Users</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h4 class="text-success"><%= occupancyStats.total_units %></h4>
+                            <small class="text-muted">Total Units</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h4 class="text-info"><%= occupierStats.total_occupiers %></h4>
+                            <small class="text-muted">Total Occupiers</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h4 class="text-warning"><%= recentNotes.length %></h4>
+                            <small class="text-muted">Recent Notes</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <% } %>
+</div>
+
+<script>
+    // Auto-refresh dashboard every 5 minutes
+    setTimeout(() => {
+        location.reload();
+    }, 300000);
+</script>

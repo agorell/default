@@ -1,0 +1,390 @@
+<%- include('../layout', { title: 'Reports' }) %>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="bi bi-bar-chart"></i> Reports
+                    </h1>
+                    <p class="text-muted">Comprehensive reports and analytics for your housing management</p>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-download"></i> Export
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="window.print()">
+                            <i class="bi bi-printer"></i> Print Report
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportToPDF()">
+                            <i class="bi bi-file-pdf"></i> Export to PDF
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Key Metrics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card">
+                <h2><%= occupancyStats.total_units %></h2>
+                <p><i class="bi bi-building"></i> Total Units</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card">
+                <h2><%= occupancyStats.occupied_units %></h2>
+                <p><i class="bi bi-people"></i> Occupied Units</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card">
+                <h2><%= occupancyStats.occupancy_rate %>%</h2>
+                <p><i class="bi bi-percent"></i> Occupancy Rate</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card">
+                <h2>$<%= occupierStats.total_monthly_revenue ? parseFloat(occupierStats.total_monthly_revenue).toFixed(0) : '0' %></h2>
+                <p><i class="bi bi-currency-dollar"></i> Monthly Revenue</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Report Categories -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-building"></i> Property Reports
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/reports/occupancy" class="btn btn-outline-primary">
+                            <i class="bi bi-pie-chart"></i> Occupancy Report
+                        </a>
+                        <a href="/reports/units" class="btn btn-outline-primary">
+                            <i class="bi bi-list"></i> Units Report
+                        </a>
+                        <a href="/reports/vacancy" class="btn btn-outline-primary">
+                            <i class="bi bi-house"></i> Vacancy Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-people"></i> Occupier Reports
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/reports/occupiers" class="btn btn-outline-success">
+                            <i class="bi bi-person-lines-fill"></i> Occupiers Report
+                        </a>
+                        <a href="/reports/financial" class="btn btn-outline-success">
+                            <i class="bi bi-currency-dollar"></i> Financial Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-journal-text"></i> Activity Reports
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/reports/notes" class="btn btn-outline-info">
+                            <i class="bi bi-journal-text"></i> Notes Activity
+                        </a>
+                        <% if (user.role_name === 'Admin') { %>
+                            <a href="/users" class="btn btn-outline-info">
+                                <i class="bi bi-person-gear"></i> User Management
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Summary Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pie-chart"></i> Units by Type
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <% if (typeStats.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Total</th>
+                                        <th>Occupied</th>
+                                        <th>Vacant</th>
+                                        <th>Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% typeStats.forEach(type => { %>
+                                        <tr>
+                                            <td><%= type.housing_type %></td>
+                                            <td>
+                                                <span class="badge bg-primary">
+                                                    <%= type.total_units %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">
+                                                    <%= type.occupied_units %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-warning">
+                                                    <%= type.vacant_units %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <% const rate = type.total_units > 0 ? (type.occupied_units / type.total_units * 100).toFixed(1) : 0 %>
+                                                <span class="badge bg-info">
+                                                    <%= rate %>%
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <p class="text-muted">No housing types found</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up"></i> Financial Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-success">
+                                $<%= occupierStats.total_monthly_revenue ? parseFloat(occupierStats.total_monthly_revenue).toFixed(2) : '0.00' %>
+                            </h4>
+                            <small class="text-muted">Current Monthly Revenue</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-primary">
+                                $<%= occupierStats.average_rent ? parseFloat(occupierStats.average_rent).toFixed(2) : '0.00' %>
+                            </h4>
+                            <small class="text-muted">Average Monthly Rent</small>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h5 class="text-info">
+                                <%= occupierStats.total_occupiers %>
+                            </h5>
+                            <small class="text-muted">Total Occupiers</small>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="text-warning">
+                                <%= occupancyStats.vacant_units %>
+                            </h5>
+                            <small class="text-muted">Vacant Units</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Recent Notes Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <% if (recentNotes.length > 0) { %>
+                        <% recentNotes.slice(0, 5).forEach(note => { %>
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="mb-1">
+                                        <a href="/notes/view/<%= note.id %>" class="text-decoration-none">
+                                            <%= note.title %>
+                                        </a>
+                                    </h6>
+                                    <div class="d-flex align-items-center">
+                                        <% if (note.category) { %>
+                                            <span class="badge bg-<%= note.getCategoryBadgeClass() %> me-2">
+                                                <%= note.category %>
+                                            </span>
+                                        <% } %>
+                                        <% if (note.unit_number) { %>
+                                            <small class="text-muted">Unit: <%= note.unit_number %></small>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    <%= new Date(note.created_at).toLocaleDateString() %>
+                                </small>
+                            </div>
+                        <% }); %>
+                        <div class="text-center mt-3">
+                            <a href="/reports/notes" class="btn btn-outline-primary btn-sm">
+                                View Full Report
+                            </a>
+                        </div>
+                    <% } else { %>
+                        <p class="text-muted">No recent notes activity</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-arrow-right-circle"></i> Recent Move-ins
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <% if (recentMoveIns.length > 0) { %>
+                        <% recentMoveIns.slice(0, 5).forEach(occupier => { %>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="mb-1">
+                                        <a href="/occupiers/view/<%= occupier.id %>" class="text-decoration-none">
+                                            <%= occupier.getFullName() %>
+                                        </a>
+                                    </h6>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-primary me-2">
+                                            Unit <%= occupier.unit_number %>
+                                        </span>
+                                        <small class="text-muted">
+                                            <%= occupier.getFormattedRent() %>/month
+                                        </small>
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    <%= occupier.getFormattedMoveInDate() %>
+                                </small>
+                            </div>
+                        <% }); %>
+                        <div class="text-center mt-3">
+                            <a href="/reports/occupiers" class="btn btn-outline-success btn-sm">
+                                View Full Report
+                            </a>
+                        </div>
+                    <% } else { %>
+                        <p class="text-muted">No recent move-ins</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notes Activity by Category -->
+    <% if (categoryStats.length > 0) { %>
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-tags"></i> Notes by Category
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <% categoryStats.forEach(category => { %>
+                            <div class="col-md-2 col-sm-4 mb-3 text-center">
+                                <div class="p-3 border rounded">
+                                    <h4 class="text-primary"><%= category.count %></h4>
+                                    <small class="text-muted"><%= category.category %></small>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <% } %>
+</div>
+
+<script>
+    // Export to PDF functionality (placeholder)
+    function exportToPDF() {
+        alert('PDF export functionality would be implemented here using a library like jsPDF or server-side PDF generation.');
+    }
+    
+    // Print stylesheet adjustments
+    window.addEventListener('beforeprint', function() {
+        document.body.classList.add('printing');
+    });
+    
+    window.addEventListener('afterprint', function() {
+        document.body.classList.remove('printing');
+    });
+    
+    // Auto-refresh dashboard every 5 minutes
+    setTimeout(() => {
+        if (document.visibilityState === 'visible') {
+            location.reload();
+        }
+    }, 300000);
+</script>
+
+<style>
+    @media print {
+        .btn, .dropdown, .sidebar, .main-content {
+            display: none !important;
+        }
+        
+        .card {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        
+        .stats-card {
+            background: white !important;
+            color: black !important;
+        }
+    }
+</style>

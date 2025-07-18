@@ -1,0 +1,367 @@
+<%- include('../layout', { title: 'Unit ' + unit.unit_number }) %>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="bi bi-building"></i> Unit <%= unit.unit_number %>
+                    </h1>
+                    <p class="text-muted"><%= unit.housing_type_name %> - <%= unit.getOccupancyStatus() %></p>
+                </div>
+                <div>
+                    <a href="/units" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Units
+                    </a>
+                    <% if (user.role_name === 'Admin' || user.role_name === 'Manager') { %>
+                        <a href="/units/edit/<%= unit.id %>" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Edit Unit
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Unit Details -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Unit Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Unit Number:</th>
+                                    <td><strong><%= unit.unit_number %></strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Housing Type:</th>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            <%= unit.housing_type_name %>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Bedrooms:</th>
+                                    <td><%= unit.bedrooms || 'N/A' %></td>
+                                </tr>
+                                <tr>
+                                    <th>Bathrooms:</th>
+                                    <td><%= unit.bathrooms || 'N/A' %></td>
+                                </tr>
+                                <tr>
+                                    <th>Square Footage:</th>
+                                    <td>
+                                        <% if (unit.square_footage) { %>
+                                            <%= unit.square_footage.toLocaleString() %> sq ft
+                                        <% } else { %>
+                                            N/A
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Rental Rate:</th>
+                                    <td>
+                                        <% if (unit.rental_rate) { %>
+                                            <strong class="text-success">
+                                                $<%= parseFloat(unit.rental_rate).toFixed(2) %>/month
+                                            </strong>
+                                        <% } else { %>
+                                            N/A
+                                        <% } %>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Occupancy Status:</th>
+                                    <td>
+                                        <% if (unit.is_occupied) { %>
+                                            <span class="badge bg-danger">Occupied</span>
+                                        <% } else { %>
+                                            <span class="badge bg-success">Vacant</span>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Condition Grade:</th>
+                                    <td>
+                                        <% if (unit.condition_grade) { %>
+                                            <span class="badge bg-<%= unit.getConditionBadgeClass() %>">
+                                                <%= unit.condition_grade %>
+                                            </span>
+                                        <% } else { %>
+                                            N/A
+                                        <% } %>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Created:</th>
+                                    <td>
+                                        <small class="text-muted">
+                                            <%= new Date(unit.created_at).toLocaleDateString() %>
+                                        </small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Last Updated:</th>
+                                    <td>
+                                        <small class="text-muted">
+                                            <%= new Date(unit.updated_at).toLocaleDateString() %>
+                                        </small>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <% if (unit.address) { %>
+                        <hr>
+                        <div class="row">
+                            <div class="col-12">
+                                <h6><i class="bi bi-geo-alt"></i> Address</h6>
+                                <p class="text-muted"><%= unit.address %></p>
+                            </div>
+                        </div>
+                    <% } %>
+                    
+                    <% if (unit.description) { %>
+                        <hr>
+                        <div class="row">
+                            <div class="col-12">
+                                <h6><i class="bi bi-card-text"></i> Description</h6>
+                                <p class="text-muted"><%= unit.description %></p>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+            
+            <!-- Current Occupier -->
+            <% if (occupier) { %>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-person"></i> Current Occupier
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <th width="40%">Name:</th>
+                                        <td>
+                                            <strong>
+                                                <a href="/occupiers/view/<%= occupier.id %>" class="text-decoration-none">
+                                                    <%= occupier.first_name %> <%= occupier.last_name %>
+                                                </a>
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Phone:</th>
+                                        <td>
+                                            <% if (occupier.phone) { %>
+                                                <a href="tel:<%= occupier.phone %>" class="text-decoration-none">
+                                                    <%= occupier.phone %>
+                                                </a>
+                                            <% } else { %>
+                                                N/A
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Email:</th>
+                                        <td>
+                                            <% if (occupier.email) { %>
+                                                <a href="mailto:<%= occupier.email %>" class="text-decoration-none">
+                                                    <%= occupier.email %>
+                                                </a>
+                                            <% } else { %>
+                                                N/A
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <th width="40%">Move-in Date:</th>
+                                        <td>
+                                            <%= new Date(occupier.occupancy_start_date).toLocaleDateString() %>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Monthly Rent:</th>
+                                        <td>
+                                            <% if (occupier.monthly_rent) { %>
+                                                <strong class="text-success">
+                                                    $<%= parseFloat(occupier.monthly_rent).toFixed(2) %>
+                                                </strong>
+                                            <% } else { %>
+                                                N/A
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Emergency Contact:</th>
+                                        <td>
+                                            <% if (occupier.emergency_contact_name) { %>
+                                                <%= occupier.emergency_contact_name %>
+                                                <% if (occupier.emergency_contact_phone) { %>
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        <a href="tel:<%= occupier.emergency_contact_phone %>" class="text-decoration-none">
+                                                            <%= occupier.emergency_contact_phone %>
+                                                        </a>
+                                                    </small>
+                                                <% } %>
+                                            <% } else { %>
+                                                N/A
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <% if (user.role_name === 'Admin' || user.role_name === 'Manager') { %>
+                            <hr>
+                            <div class="d-flex gap-2">
+                                <a href="/occupiers/edit/<%= occupier.id %>" class="btn btn-warning btn-sm">
+                                    <i class="bi bi-pencil"></i> Edit Occupier
+                                </a>
+                                <form method="POST" action="/occupiers/move-out/<%= occupier.id %>" class="d-inline">
+                                    <button type="submit" class="btn btn-danger btn-sm" 
+                                            data-confirm="Are you sure you want to move out <%= occupier.first_name %> <%= occupier.last_name %>?">
+                                        <i class="bi bi-box-arrow-right"></i> Move Out
+                                    </button>
+                                </form>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-person"></i> Occupier Information
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <i class="bi bi-person-x text-muted" style="font-size: 3rem;"></i>
+                        <h5 class="mt-3 text-muted">Unit is Vacant</h5>
+                        <p class="text-muted">This unit is currently available for occupancy.</p>
+                        <% if (user.role_name === 'Admin' || user.role_name === 'Manager') { %>
+                            <a href="/occupiers/add?unit_id=<%= unit.id %>" class="btn btn-primary">
+                                <i class="bi bi-person-plus"></i> Add Occupier
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightning"></i> Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/notes/add?unit_id=<%= unit.id %>" class="btn btn-primary btn-sm">
+                            <i class="bi bi-journal-plus"></i> Add Note
+                        </a>
+                        
+                        <% if (user.role_name === 'Admin' || user.role_name === 'Manager') { %>
+                            <% if (!unit.is_occupied) { %>
+                                <a href="/occupiers/add?unit_id=<%= unit.id %>" class="btn btn-success btn-sm">
+                                    <i class="bi bi-person-plus"></i> Add Occupier
+                                </a>
+                            <% } %>
+                            
+                            <a href="/units/edit/<%= unit.id %>" class="btn btn-warning btn-sm">
+                                <i class="bi bi-pencil"></i> Edit Unit
+                            </a>
+                        <% } %>
+                        
+                        <a href="/reports/units" class="btn btn-info btn-sm">
+                            <i class="bi bi-bar-chart"></i> Unit Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Notes -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-journal-text"></i> Recent Notes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <% if (notes.length > 0) { %>
+                        <% notes.slice(0, 5).forEach(note => { %>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <a href="/notes/view/<%= note.id %>" class="text-decoration-none">
+                                                <%= note.title %>
+                                            </a>
+                                        </h6>
+                                        <% if (note.category) { %>
+                                            <span class="badge bg-<%= note.getCategoryBadgeClass() %> mb-1">
+                                                <%= note.category %>
+                                            </span>
+                                        <% } %>
+                                        <p class="mb-1 text-muted small">
+                                            <%= note.getShortContent(80) %>
+                                        </p>
+                                        <small class="text-muted">
+                                            by <%= note.created_by_name %>
+                                        </small>
+                                    </div>
+                                    <small class="text-muted">
+                                        <%= new Date(note.created_at).toLocaleDateString() %>
+                                    </small>
+                                </div>
+                            </div>
+                        <% }); %>
+                        
+                        <% if (notes.length > 5) { %>
+                            <div class="text-center">
+                                <a href="/notes?unit_id=<%= unit.id %>" class="btn btn-outline-primary btn-sm">
+                                    View All Notes (<%= notes.length %>)
+                                </a>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <p class="text-muted">No notes found for this unit.</p>
+                        <a href="/notes/add?unit_id=<%= unit.id %>" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-journal-plus"></i> Add First Note
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

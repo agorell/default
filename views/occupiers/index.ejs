@@ -1,0 +1,259 @@
+<%- include('../layout', { title: 'Occupiers' }) %>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="bi bi-people"></i> Occupiers
+                    </h1>
+                    <p class="text-muted">Manage current occupiers and their information</p>
+                </div>
+                <% if (user.role_name === 'Admin' || user.role_name === 'Manager') { %>
+                <a href="/occupiers/add" class="btn btn-primary">
+                    <i class="bi bi-person-plus"></i> Add Occupier
+                </a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filter-section">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Search</label>
+                <input type="text" class="form-control search-box" id="search" name="search" 
+                       placeholder="Search occupiers..." value="<%= filters.search || '' %>">
+            </div>
+            
+            <div class="col-md-3">
+                <label for="type" class="form-label">Housing Type</label>
+                <select class="form-select" id="type" name="type">
+                    <option value="">All Types</option>
+                    <% housingTypes.forEach(type => { %>
+                        <option value="<%= type.id %>" <%= filters.type == type.id ? 'selected' : '' %>>
+                            <%= type.name %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+            
+            <div class="col-md-5">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    <a href="/occupiers" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Clear
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Occupiers Table -->
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-list"></i> Occupiers List
+                </h5>
+                <span class="badge bg-primary">
+                    <%= occupiers.length %> occupier<%= occupiers.length !== 1 ? 's' : '' %>
+                </span>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <% if (occupiers.length > 0) { %>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Unit</th>
+                                <th>Type</th>
+                                <th>Contact</th>
+                                <th>Move-in Date</th>
+                                <th>Monthly Rent</th>
+                                <th>Emergency Contact</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% occupiers.forEach(occupier => { %>
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <strong><%= occupier.getFullName() %></strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">
+                                            <%= occupier.unit_number %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            <%= occupier.housing_type_name %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="small">
+                                            <% if (occupier.phone) { %>
+                                                <div>
+                                                    <i class="bi bi-telephone"></i>
+                                                    <a href="tel:<%= occupier.phone %>" class="text-decoration-none">
+                                                        <%= occupier.phone %>
+                                                    </a>
+                                                </div>
+                                            <% } %>
+                                            <% if (occupier.email) { %>
+                                                <div>
+                                                    <i class="bi bi-envelope"></i>
+                                                    <a href="mailto:<%= occupier.email %>" class="text-decoration-none">
+                                                        <%= occupier.email %>
+                                                    </a>
+                                                </div>
+                                            <% } %>
+                                            <% if (!occupier.phone && !occupier.email) { %>
+                                                <span class="text-muted">N/A</span>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <%= occupier.getFormattedMoveInDate() %>
+                                        </div>
+                                        <small class="text-muted">
+                                            <%= occupier.getOccupancyDuration() %>
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <% if (occupier.monthly_rent) { %>
+                                            <strong class="text-success">
+                                                <%= occupier.getFormattedRent() %>
+                                            </strong>
+                                        <% } else { %>
+                                            <span class="text-muted">N/A</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (occupier.emergency_contact_name) { %>
+                                            <div class="small">
+                                                <div><%= occupier.emergency_contact_name %></div>
+                                                <% if (occupier.emergency_contact_phone) { %>
+                                                    <div class="text-muted">
+                                                        <a href="tel:<%= occupier.emergency_contact_phone %>" class="text-decoration-none">
+                                                            <%= occupier.emergency_contact_phone %>
+                                                        </a>
+                                                    </div>
+                                                <% } %>
+                                            </div>
+                                        <% } else { %>
+                                            <span class="text-muted">N/A</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="/occupiers/view/<%= occupier.id %>" class="btn btn-sm btn-outline-primary" 
+                                               title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            
+                                            <% if (user.role_name === 'Admin' || user.role_name === 'Manager') { %>
+                                                <a href="/occupiers/edit/<%= occupier.id %>" class="btn btn-sm btn-outline-warning" 
+                                                   title="Edit Occupier">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                
+                                                <form method="POST" action="/occupiers/move-out/<%= occupier.id %>" 
+                                                      class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                            title="Move Out"
+                                                            data-confirm="Are you sure you want to move out <%= occupier.getFullName() %> from unit <%= occupier.unit_number %>?">
+                                                        <i class="bi bi-box-arrow-right"></i>
+                                                    </button>
+                                                </form>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="text-center py-5">
+                    <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3 text-muted">No occupiers found</h5>
+                    <p class="text-muted">
+                        <% if (filters.search || filters.type) { %>
+                            Try adjusting your filters to see more results.
+                        <% } else { %>
+                            Get started by adding your first occupier.
+                        <% } %>
+                    </p>
+                    <% if (user.role_name === 'Admin' || user.role_name === 'Manager') { %>
+                        <a href="/occupiers/add" class="btn btn-primary">
+                            <i class="bi bi-person-plus"></i> Add First Occupier
+                        </a>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Live search functionality
+    document.getElementById('search').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+    
+    // Sort table by clicking headers
+    document.addEventListener('DOMContentLoaded', function() {
+        const headers = document.querySelectorAll('th');
+        headers.forEach((header, index) => {
+            if (index < headers.length - 1) { // Don't make actions column sortable
+                header.style.cursor = 'pointer';
+                header.addEventListener('click', function() {
+                    sortTable(index);
+                });
+            }
+        });
+    });
+    
+    function sortTable(columnIndex) {
+        const table = document.querySelector('table');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+        rows.sort((a, b) => {
+            const aText = a.cells[columnIndex].textContent.trim();
+            const bText = b.cells[columnIndex].textContent.trim();
+            
+            // Try to parse as numbers first
+            const aNum = parseFloat(aText.replace(/[^0-9.-]/g, ''));
+            const bNum = parseFloat(bText.replace(/[^0-9.-]/g, ''));
+            
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return aNum - bNum;
+            }
+            
+            // Sort as strings
+            return aText.localeCompare(bText);
+        });
+        
+        rows.forEach(row => tbody.appendChild(row));
+    }
+</script>

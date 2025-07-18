@@ -1,0 +1,222 @@
+<%- include('../layout', { title: title }) %>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="bi bi-building"></i> <%= title %>
+                    </h1>
+                    <p class="text-muted">
+                        <%= action === 'add' ? 'Add a new housing unit to your inventory' : 'Update housing unit information' %>
+                    </p>
+                </div>
+                <a href="/units" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Units
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Unit Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Error Messages -->
+                    <% if (typeof error !== 'undefined' && error) { %>
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i> <%= error %>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Validation Errors -->
+                    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                <% errors.forEach(error => { %>
+                                    <li><%= error.msg %></li>
+                                <% }); %>
+                            </ul>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Unit Form -->
+                    <form method="POST" action="/units/<%= action === 'add' ? 'add' : 'edit/' + unit.id %>">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="unit_number" class="form-label">
+                                        <i class="bi bi-hash"></i> Unit Number *
+                                    </label>
+                                    <input type="text" class="form-control" id="unit_number" name="unit_number" 
+                                           value="<%= unit.unit_number || '' %>" required>
+                                    <div class="form-text">Unique identifier for this unit (e.g., A-101, Unit 5, etc.)</div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="housing_type_id" class="form-label">
+                                        <i class="bi bi-building"></i> Housing Type *
+                                    </label>
+                                    <select class="form-select" id="housing_type_id" name="housing_type_id" required>
+                                        <option value="">Select Housing Type</option>
+                                        <% housingTypes.forEach(type => { %>
+                                            <option value="<%= type.id %>" 
+                                                    <%= unit.housing_type_id == type.id ? 'selected' : '' %>>
+                                                <%= type.name %>
+                                            </option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="bedrooms" class="form-label">
+                                        <i class="bi bi-door-open"></i> Bedrooms
+                                    </label>
+                                    <input type="number" class="form-control" id="bedrooms" name="bedrooms" 
+                                           value="<%= unit.bedrooms || '' %>" min="0" max="10">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="bathrooms" class="form-label">
+                                        <i class="bi bi-droplet"></i> Bathrooms
+                                    </label>
+                                    <input type="number" class="form-control" id="bathrooms" name="bathrooms" 
+                                           value="<%= unit.bathrooms || '' %>" min="0" max="10" step="0.5">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="square_footage" class="form-label">
+                                        <i class="bi bi-rulers"></i> Square Footage
+                                    </label>
+                                    <input type="number" class="form-control" id="square_footage" name="square_footage" 
+                                           value="<%= unit.square_footage || '' %>" min="0">
+                                    <div class="form-text">Square feet</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="rental_rate" class="form-label">
+                                        <i class="bi bi-currency-dollar"></i> Monthly Rental Rate
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="rental_rate" name="rental_rate" 
+                                               value="<%= unit.rental_rate || '' %>" min="0" step="0.01">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="condition_grade" class="form-label">
+                                        <i class="bi bi-star"></i> Condition Grade
+                                    </label>
+                                    <select class="form-select" id="condition_grade" name="condition_grade">
+                                        <option value="">Select Condition</option>
+                                        <option value="Excellent" <%= unit.condition_grade === 'Excellent' ? 'selected' : '' %>>
+                                            Excellent
+                                        </option>
+                                        <option value="Good" <%= unit.condition_grade === 'Good' ? 'selected' : '' %>>
+                                            Good
+                                        </option>
+                                        <option value="Fair" <%= unit.condition_grade === 'Fair' ? 'selected' : '' %>>
+                                            Fair
+                                        </option>
+                                        <option value="Poor" <%= unit.condition_grade === 'Poor' ? 'selected' : '' %>>
+                                            Poor
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="address" class="form-label">
+                                <i class="bi bi-geo-alt"></i> Address
+                            </label>
+                            <textarea class="form-control" id="address" name="address" rows="2" 
+                                      placeholder="Physical address of the unit"><%= unit.address || '' %></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">
+                                <i class="bi bi-card-text"></i> Description
+                            </label>
+                            <textarea class="form-control" id="description" name="description" rows="3" 
+                                      placeholder="Additional details about the unit"><%= unit.description || '' %></textarea>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="/units" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-<%= action === 'add' ? 'plus' : 'check' %>-circle"></i> 
+                                <%= action === 'add' ? 'Add' : 'Update' %> Unit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-generate unit number suggestion
+    document.addEventListener('DOMContentLoaded', function() {
+        const unitNumberInput = document.getElementById('unit_number');
+        const housingTypeSelect = document.getElementById('housing_type_id');
+        
+        // Only for add form
+        if ('<%= action %>' === 'add') {
+            housingTypeSelect.addEventListener('change', function() {
+                if (this.value && !unitNumberInput.value) {
+                    const typeName = this.options[this.selectedIndex].text;
+                    const prefix = typeName.substring(0, 1).toUpperCase();
+                    const timestamp = Date.now().toString().slice(-3);
+                    unitNumberInput.value = prefix + '-' + timestamp;
+                }
+            });
+        }
+    });
+    
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const unitNumber = document.getElementById('unit_number').value.trim();
+        const housingType = document.getElementById('housing_type_id').value;
+        
+        if (!unitNumber) {
+            e.preventDefault();
+            alert('Unit number is required');
+            return;
+        }
+        
+        if (!housingType) {
+            e.preventDefault();
+            alert('Housing type is required');
+            return;
+        }
+    });
+</script>

@@ -1,0 +1,38 @@
+{
+  "name": "independent-living-housing-management",
+  "version": "1.0.0",
+  "description": "Independent Living Housing Management System - Phase 1",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "init-db": "node scripts/init-db.js",
+    "seed-db": "node scripts/seed-db.js"
+  },
+  "keywords": [
+    "housing",
+    "management",
+    "independent-living",
+    "node.js",
+    "express"
+  ],
+  "author": "Claude Code",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "ejs": "^3.1.9",
+    "express-session": "^1.17.3",
+    "bcrypt": "^5.1.1",
+    "better-sqlite3": "^8.7.0",
+    "multer": "^1.4.5-lts.1",
+    "express-validator": "^7.0.1",
+    "method-override": "^3.0.0",
+    "connect-flash": "^0.1.1",
+    "helmet": "^7.0.0",
+    "express-rate-limit": "^6.10.0",
+    "compression": "^1.7.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
