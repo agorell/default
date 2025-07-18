@@ -53,7 +53,17 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           
           # Allow Claude to use all necessary tools with expanded permissions
-          allowed_tools: "Bash(*),Git(*),FileSystem(*),Write(*),Read(*),Edit(*),MultiEdit(*),Glob(*),Grep(*),LS(*)"
+          allowed_tools: |
+            Bash(*)
+            Git(*)
+            FileSystem(*)
+            Write(*)
+            Read(*)
+            Edit(*)
+            MultiEdit(*)
+            Glob(*)
+            Grep(*)
+            LS(*)
           
           # Custom instructions for Claude to use full capabilities
           custom_instructions: |
