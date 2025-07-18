@@ -1,0 +1,5 @@
+Testing git access and commit functionality.
+
+This is a test file to verify that commits can be made to the repository.
+Date: 2025-07-18
+Purpose: Testing git access before implementing housing management system.
