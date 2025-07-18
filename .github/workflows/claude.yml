@@ -19,29 +19,42 @@ jobs:
       (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
     permissions:
-      contents: write           # Changed from 'read' to 'write' - allows pushing to branches
-      pull-requests: write      # Changed from 'read' to 'write' - allows creating/updating PRs
-      issues: write             # Changed from 'read' to 'write' - allows updating issues
+      contents: write
+      pull-requests: write
+      issues: write
       id-token: write
       actions: read
-      checks: write             # Added - allows updating check runs
-      statuses: write           # Added - allows updating commit statuses
-      packages: read            # Added - allows reading packages (if needed)
-      deployments: write        # Added - allows managing deployments (if needed)
+      checks: write
+      statuses: write
+      packages: read
+      deployments: write
+      repository-projects: read   # Added - allows reading project information
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0        # Changed from 1 to 0 - fetches full history and all branches
-          token: ${{ secrets.GITHUB_TOKEN }}  # Added - ensures proper authentication
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # Ensure we can access all branches and refs
+          ref: ${{ github.head_ref || github.ref }}
+      
+      - name: Configure Git
+        run: |
+          git config --global user.name "Claude Code"
+          git config --global user.email "claude@anthropic.com"
+          git config --global init.defaultBranch main
+          git config --global pull.rebase false
+          # Set git to use the GitHub token for authentication
+          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+      
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}  # Added - provides GitHub token to Claude
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
-          # This is an optional setting that allows Claude to read CI results on PRs
+          # Enhanced permissions to allow full access
           additional_permissions: |
             actions: read
             contents: write
@@ -49,29 +62,46 @@ jobs:
             issues: write
             checks: write
             statuses: write
+            metadata: read
+            repository-projects: read
           
-          # Optional: Specify model (defaults to Claude Sonnet 4, uncomment for Claude Opus 4)
-          # model: "claude-opus-4-20250514"
+          # Allow Claude to use all necessary tools with expanded permissions
+          allowed_tools: |
+            Bash(*),
+            Git(*),
+            FileSystem(*),
+            Write(*),
+            Read(*)
           
-          # Optional: Customize the trigger phrase (default: @claude)
-          # trigger_phrase: "/claude"
-          
-          # Optional: Trigger when specific user is assigned to an issue
-          assignee_trigger: "claude-bot"
-          
-          # Optional: Allow Claude to run specific commands
-          allowed_tools: "Bash(*),Git(*),FileSystem(*)"
-          
-          # Optional: Add custom instructions for Claude to customize its behavior for your project
+          # Custom instructions for Claude to use full capabilities
           custom_instructions: |
-            You have full access to read and write files, create branches, and push changes
-            Always create a new branch for significant changes
-            Follow our coding standards and ensure all new code has tests
-            Use TypeScript for new files
+            You have full access to:
+            - Read and write files using FileSystem tools
+            - Execute bash commands including ls, curl, find, grep, etc.
+            - Full git operations including checkout, fetch, merge, rebase
+            - Create, switch, and manage branches
+            - Push changes and create pull requests
+            - Read repository metadata and project information
+            
+            Git configuration:
+            - User name: Claude Code
+            - User email: claude@anthropic.com
+            - Authentication is pre-configured with GitHub token
+            
+            Best practices:
+            - Always create feature branches for changes
+            - Use descriptive commit messages
+            - Test changes before committing
+            - Follow the project's coding standards
           
-          # Optional: Custom environment variables for Claude
+          # Environment variables for enhanced functionality
           claude_env: |
             NODE_ENV: development
             GIT_AUTHOR_NAME: Claude Code
             GIT_AUTHOR_EMAIL: claude@anthropic.com
-
+            GIT_COMMITTER_NAME: Claude Code
+            GIT_COMMITTER_EMAIL: claude@anthropic.com
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            # Allow Claude to use system commands
+            PATH: /usr/local/bin:/usr/bin:/bin
+            SHELL: /bin/bash
