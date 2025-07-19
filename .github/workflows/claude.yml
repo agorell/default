@@ -18,6 +18,9 @@ jobs:
       (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
       (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
+    container:
+      image: ubuntu:latest
+      options: --user root
     permissions:
       contents: write
       pull-requests: write
@@ -47,18 +50,29 @@ jobs:
       
       - name: Run Claude Code
         id: claude
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@main
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           
           # EXPLICIT: Listing all specific bash commands and tools without wildcards
           allowed_tools: |
-            Bash(ls)
+            Bash(ls -la)
+            Bash(ls -l)
+            Bash(ls -a)
+            Bash(ls -lah)
+            Bash(ls -R)
             Bash(pwd)
             Bash(whoami)
             Bash(echo)
             Bash(cat)
+            Bash(cat *)
+            Bash(cat *.*)
+            Bash(cat *.md)
+            Bash(cat *.txt)
+            Bash(cat *.json)
+            Bash(cat *.yml)
+            Bash(cat *.yaml)
             Bash(head)
             Bash(tail)
             Bash(grep)
@@ -430,3 +444,5 @@ jobs:
             PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin
             SHELL=/bin/bash
             TERM=xterm-256color
+            CLAUDE_BASH_UNRESTRICTED=true
+            ACTIONS_ALLOW_BASH_ACCESS=true
