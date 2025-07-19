@@ -560,6 +560,19 @@ jobs:
             
             Remember: Your specialized tools (LS, Read, Write, Grep, Glob, FileSystem, Git) provide 
             complete functionality and are more reliable than bash equivalents!
+
+            WORKFLOW:
+            1. Always test bash access first with simple commands
+            2. Use git commands to explore repository structure
+            3. Make changes as requested
+            4. Commit and push changes to remote branch
+            5. Provide clear status updates
+            
+            IMPORTANT: You are expected to:
+            - Execute bash commands to complete tasks
+            - Use git operations freely
+            - Create, modify, and delete files as needed
+            - Always push your changes to the remote repository
             
           claude_env: |
             NODE_ENV=development
