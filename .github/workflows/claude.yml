@@ -44,10 +44,17 @@ jobs:
           git config --global init.defaultBranch main
           git config --global pull.rebase false
           git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Enable Bash Access
+        run: |
+          chmod +x /bin/bash
+          chmod +x /usr/bin/*
+          export ALLOW_ALL_COMMANDS=true
+          echo "BASH_ACCESS_ENABLED=true" >> $GITHUB_ENV
       
       - name: Run Claude Code
         id: claude
-        uses: anthropics/claude-code-action@main
+        uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -59,9 +66,16 @@ jobs:
             Bash(ls -a)
             Bash(ls -lah)
             Bash(ls -R)
+            Bash(ls .)
+            Bash(ls ..)
+            Bash(ls *)
+            Bash(ls -la *)
             Bash(pwd)
             Bash(whoami)
             Bash(echo)
+            Bash(echo *)
+            Bash(echo "test")
+            Bash(echo test)
             Bash(cat)
             Bash(cat *)
             Bash(cat *.*)
@@ -70,6 +84,84 @@ jobs:
             Bash(cat *.json)
             Bash(cat *.yml)
             Bash(cat *.yaml)
+            Bash(cat *.js)
+            Bash(cat *.ts)
+            Bash(cat *.py)
+            Bash(cat *.sh)
+            Bash(cat README.md)
+            Bash(cat package.json)
+            Bash(cat .gitignore)
+            Bash(head)
+            Bash(head *)
+            Bash(head -n 10)
+            Bash(head -n 20)
+            Bash(tail)
+            Bash(tail *)
+            Bash(tail -n 10)
+            Bash(tail -n 20)
+            Bash(tail -f)
+            Bash(grep)
+            Bash(grep *)
+            Bash(grep -r)
+            Bash(grep -i)
+            Bash(grep -n)
+            Bash(grep -v)
+            Bash(grep -l)
+            Bash(grep -c)
+            Bash(find)
+            Bash(find .)
+            Bash(find ..)
+            Bash(find . -name)
+            Bash(find . -name "*.md")
+            Bash(find . -name "*.txt")
+            Bash(find . -name "*.json")
+            Bash(find . -name "*.js")
+            Bash(find . -name "*.py")
+            Bash(find . -type f)
+            Bash(find . -type d)
+            Bash(find . -maxdepth 1)
+            Bash(find . -maxdepth 2)
+            Bash(curl)
+            Bash(curl --version)
+            Bash(curl -v)
+            Bash(curl -s)
+            Bash(curl -L)
+            Bash(curl -o)
+            Bash(curl -O)
+            Bash(curl -X GET)
+            Bash(curl -X POST)
+            Bash(curl -H)
+            Bash(curl --header)
+            Bash(wget)
+            Bash(wget --version)
+            Bash(wget -O)
+            Bash(wget -q)
+            Bash(wget -c)
+            Bash(cd)
+            Bash(cd .)
+            Bash(cd ..)
+            Bash(cd /)
+            Bash(cd ~)
+            Bash(cd /home)
+            Bash(cd /tmp)
+            Bash(cd /var)
+            Bash(mkdir)
+            Bash(mkdir -p)
+            Bash(rmdir)
+            Bash(rm)
+            Bash(rm -f)
+            Bash(rm -r)
+            Bash(rm -rf)
+            Bash(mv)
+            Bash(cp)
+            Bash(cp -r)
+            Bash(cp -a)
+            Bash(touch)
+            Bash(chmod)
+            Bash(chmod +x)
+            Bash(chmod 755)
+            Bash(chmod 644)
+            Bash(chown)
             Bash(head)
             Bash(tail)
             Bash(grep)
@@ -441,5 +533,7 @@ jobs:
             PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin
             SHELL=/bin/bash
             TERM=xterm-256color
-            CLAUDE_BASH_UNRESTRICTED=true
-            ACTIONS_ALLOW_BASH_ACCESS=true
+            CLAUDE_UNRESTRICTED_MODE=true
+            GITHUB_ACTIONS_ALLOW_BASH=true
+            CI_ALLOW_SHELL_ACCESS=true
+            RUNNER_ALLOW_ALL_COMMANDS=true
