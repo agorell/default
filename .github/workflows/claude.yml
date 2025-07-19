@@ -479,42 +479,87 @@ jobs:
             LS(files)
           
           custom_instructions: |
-            You have been granted the following permissions:
+            # CLAUDE CODE ACCESS CONFIGURATION
             
-            BASH ACCESS: You can execute bash commands including:
-            - ls, pwd, whoami, echo, cat, grep, find, curl
-            - All git commands (git status, git add, git commit, git push, git checkout, git fetch, git branch, etc.)
-            - File operations (mkdir, rm, mv, cp, chmod)
-            - System commands (ps, df, du, which, whereis)
+            ## 🟢 AVAILABLE BASH COMMANDS (Confirmed Working):
+            **Basic Operations:**
+            - `ls -la`, `ls -l`, `ls -a`, `ls -R` - Directory listing (✅ WORKS)
+            - `pwd`, `whoami`, `echo` - Basic info commands (✅ WORKS)
+            - `cat`, `head`, `tail` - File reading commands (✅ WORKS)
+            - `cd` - Directory navigation (✅ WORKS)
             
-            GIT ACCESS: Full git repository access including:
-            - Branch operations (checkout, create, switch, merge)
-            - Commit operations (add, commit, push, pull)
-            - Remote operations (fetch, push, pull)
-            - History operations (log, diff, show)
+            **System Monitoring:**
+            - `ps aux`, `df -h`, `free -h`, `uname -a`, `uptime`, `date` (✅ WORKS)
+            - `which`, `whereis`, `env`, `printenv` (✅ WORKS)
             
-            FILE ACCESS: Complete file system access:
-            - Read any file in the repository
-            - Write/create new files
-            - Edit existing files
-            - Delete files (use with caution)
+            **Text Processing (Available but may require permission):**
+            - `awk`, `sed`, `sort`, `uniq`, `wc`, `cut`, `tr` (✅ Listed in config)
             
-            WORKFLOW:
-            1. Always test bash access first with simple commands
-            2. Use git commands to explore repository structure
-            3. Make changes as requested
-            4. Commit and push changes to remote branch
-            5. Provide clear status updates
+            ## ⚠️ SECURITY-GATED COMMANDS (Use Alternatives):
+            **File Operations - USE SPECIALIZED TOOLS INSTEAD:**
+            - ❌ `mkdir` → Use **FileSystem(mkdir)** or **Write tool**
+            - ❌ `echo >` (redirection) → Use **Write tool** to create files
+            - ❌ `cp`, `mv` → Use **FileSystem(copy)**, **FileSystem(move)**
+            - ❌ `chmod` → Use **FileSystem(chmod)**
+            - ❌ `rm` → Use **FileSystem(rm)** (be very careful!)
             
-            IMPORTANT: You are expected to:
-            - Execute bash commands to complete tasks
-            - Use git operations freely
-            - Create, modify, and delete files as needed
-            - Always push your changes to the remote repository
+            **Search Operations - USE SPECIALIZED TOOLS:**
+            - ❌ `grep` command → Use **Grep tool** (works perfectly!)
+            - ❌ `find` command → Use **Glob tool** (works perfectly!)
             
-            Git configuration:
-            - User: Claude Code <claude@anthropic.com>
-            - Authentication: Pre-configured with GitHub token
+            **Package Management - RESTRICTED:**
+            - ❌ `bun --version`, `npm --version` → Use other methods to check versions
+            - ❌ Package installations blocked in Actions environment
+            
+            ## 🔧 PREFERRED TOOLS (Always Work):
+            **Instead of bash commands, use these specialized tools:**
+            1. **LS tool** - Better than `ls`, shows complete directory structure
+            2. **Read tool** - Better than `cat`, handles all file types
+            3. **Write tool** - Better than `echo >`, creates/edits files safely
+            4. **Grep tool** - Better than `grep`, powerful search capabilities
+            5. **Glob tool** - Better than `find`, pattern matching and file discovery
+            6. **FileSystem tools** - All file operations (mkdir, copy, move, etc.)
+            7. **Git tools** - All git operations work perfectly
+            
+            ## 📋 WORKFLOW STRATEGY:
+            1. **Start with specialized tools** - They always work and are more reliable
+            2. **Use bash commands for system info** - `ps`, `df`, `uname`, etc.
+            3. **Avoid restricted operations** - Don't try `mkdir`, `grep`, `find` via bash
+            4. **Dynamic permissions** - Some commands work initially then become restricted
+            5. **Git operations** - Full access via Git tools
+            
+            ## 🎯 DEVELOPMENT WORKFLOW:
+            **For file operations:**
+            - List files: Use **LS tool** or `ls -la`
+            - Read files: Use **Read tool** or `cat filename`
+            - Create files: Use **Write tool** (never `echo >`)
+            - Search content: Use **Grep tool** (never `grep`)
+            - Find files: Use **Glob tool** (never `find`)
+            
+            **For git operations:**
+            - Use Git tools for all repository operations
+            - `git status`, `git add`, `git commit`, `git push` all work via Git tools
+            
+            **For system monitoring:**
+            - `ps aux`, `df -h`, `free -h` work perfectly via bash
+            - Use these for debugging and system status
+            
+            ## ⚡ IMPORTANT NOTES:
+            - **Session-based restrictions**: Commands may work initially then become restricted
+            - **Security by design**: File operations are intentionally limited to specialized tools
+            - **Always prefer specialized tools** over bash commands when available
+            - **Test with simple commands first** before attempting complex operations
+            - **Git authentication is pre-configured** with GitHub token
+            
+            ## 🔒 ENVIRONMENT CONTEXT:
+            - **Location**: GitHub Actions runner environment
+            - **User**: `runner` (not repository owner)
+            - **Working directory**: Usually in `/home/runner/work/` or action directory
+            - **Git config**: Claude Code <claude@anthropic.com>
+            - **Permissions**: Read/write to repository, create branches, push changes
+            
+            Remember: Your specialized tools (LS, Read, Write, Grep, Glob, FileSystem, Git) provide 
+            complete functionality and are more reliable than bash equivalents!
             
           claude_env: |
             NODE_ENV=development
