@@ -29,13 +29,12 @@ jobs:
       packages: read
       deployments: write
       repository-projects: read
-      # Note: workflows permission cannot be granted to GitHub Apps for security
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CLAUDE_PAT }}  # Using PAT instead of GITHUB_TOKEN
           ref: ${{ github.head_ref || github.ref }}
       
       - name: Configure Git
@@ -44,14 +43,15 @@ jobs:
           git config --global user.email "claude@anthropic.com"
           git config --global init.defaultBranch main
           git config --global pull.rebase false
-          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          # Configure authentication with PAT
+          git config --global url."https://x-access-token:${{ secrets.CLAUDE_PAT }}@github.com/".insteadOf "https://github.com/"
       
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.CLAUDE_PAT }}  # Using PAT instead of GITHUB_TOKEN
           
           # Allow Claude to use all necessary tools with expanded permissions
           allowed_tools: |
@@ -75,11 +75,12 @@ jobs:
             - Create, switch, and manage branches
             - Push changes and create pull requests
             - Read repository metadata and project information
+            - Modify workflow files (you have workflows permission via PAT)
             
             Git configuration:
             - User name: Claude Code
             - User email: claude@anthropic.com
-            - Authentication is pre-configured with GitHub token
+            - Authentication is pre-configured with GitHub PAT
             
             Best practices:
             - Always create feature branches for changes
@@ -94,6 +95,6 @@ jobs:
             GIT_AUTHOR_EMAIL=claude@anthropic.com
             GIT_COMMITTER_NAME=Claude Code
             GIT_COMMITTER_EMAIL=claude@anthropic.com
-            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN=${{ secrets.CLAUDE_PAT }}
             PATH=/usr/local/bin:/usr/bin:/bin
             SHELL=/bin/bash
