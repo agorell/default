@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.CLAUDE_PAT }}  # Using PAT instead of GITHUB_TOKEN
+          token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.head_ref || github.ref }}
       
       - name: Configure Git
@@ -43,58 +43,390 @@ jobs:
           git config --global user.email "claude@anthropic.com"
           git config --global init.defaultBranch main
           git config --global pull.rebase false
-          # Configure authentication with PAT
-          git config --global url."https://x-access-token:${{ secrets.CLAUDE_PAT }}@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
       
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.CLAUDE_PAT }}  # Using PAT instead of GITHUB_TOKEN
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           
-          # Allow Claude to use all necessary tools with expanded permissions
+          # EXPLICIT: Listing all specific bash commands and tools without wildcards
           allowed_tools: |
-            Bash(*)
-            Git(*)
-            FileSystem(*)
-            Write(*)
-            Read(*)
-            Edit(*)
-            MultiEdit(*)
-            Glob(*)
-            Grep(*)
-            LS(*)
+            Bash(ls)
+            Bash(pwd)
+            Bash(whoami)
+            Bash(echo)
+            Bash(cat)
+            Bash(head)
+            Bash(tail)
+            Bash(grep)
+            Bash(find)
+            Bash(curl)
+            Bash(wget)
+            Bash(awk)
+            Bash(sed)
+            Bash(sort)
+            Bash(uniq)
+            Bash(wc)
+            Bash(cut)
+            Bash(tr)
+            Bash(xargs)
+            Bash(which)
+            Bash(whereis)
+            Bash(file)
+            Bash(stat)
+            Bash(du)
+            Bash(df)
+            Bash(ps)
+            Bash(top)
+            Bash(kill)
+            Bash(killall)
+            Bash(chmod)
+            Bash(chown)
+            Bash(mkdir)
+            Bash(rmdir)
+            Bash(rm)
+            Bash(mv)
+            Bash(cp)
+            Bash(ln)
+            Bash(touch)
+            Bash(tar)
+            Bash(gzip)
+            Bash(gunzip)
+            Bash(zip)
+            Bash(unzip)
+            Bash(ssh)
+            Bash(scp)
+            Bash(rsync)
+            Bash(ping)
+            Bash(nslookup)
+            Bash(dig)
+            Bash(netstat)
+            Bash(ss)
+            Bash(ifconfig)
+            Bash(ip)
+            Bash(route)
+            Bash(iptables)
+            Bash(systemctl)
+            Bash(service)
+            Bash(crontab)
+            Bash(mount)
+            Bash(umount)
+            Bash(fdisk)
+            Bash(lsblk)
+            Bash(blkid)
+            Bash(free)
+            Bash(uname)
+            Bash(uptime)
+            Bash(date)
+            Bash(cal)
+            Bash(history)
+            Bash(alias)
+            Bash(export)
+            Bash(env)
+            Bash(printenv)
+            Bash(set)
+            Bash(unset)
+            Bash(source)
+            Bash(.)
+            Bash(eval)
+            Bash(exec)
+            Bash(nohup)
+            Bash(screen)
+            Bash(tmux)
+            Bash(jobs)
+            Bash(bg)
+            Bash(fg)
+            Bash(disown)
+            Bash(wait)
+            Bash(sleep)
+            Bash(timeout)
+            Bash(watch)
+            Bash(yes)
+            Bash(seq)
+            Bash(shuf)
+            Bash(factor)
+            Bash(bc)
+            Bash(dc)
+            Bash(expr)
+            Bash(test)
+            Bash([)
+            Bash(true)
+            Bash(false)
+            Bash(read)
+            Bash(printf)
+            Bash(tee)
+            Bash(less)
+            Bash(more)
+            Bash(nano)
+            Bash(vim)
+            Bash(emacs)
+            Bash(vi)
+            Git(init)
+            Git(clone)
+            Git(add)
+            Git(commit)
+            Git(push)
+            Git(pull)
+            Git(fetch)
+            Git(merge)
+            Git(rebase)
+            Git(checkout)
+            Git(switch)
+            Git(branch)
+            Git(tag)
+            Git(status)
+            Git(log)
+            Git(show)
+            Git(diff)
+            Git(blame)
+            Git(annotate)
+            Git(grep)
+            Git(bisect)
+            Git(reset)
+            Git(revert)
+            Git(clean)
+            Git(stash)
+            Git(remote)
+            Git(submodule)
+            Git(config)
+            Git(help)
+            Git(version)
+            Git(archive)
+            Git(bundle)
+            Git(cherry-pick)
+            Git(citool)
+            Git(gui)
+            Git(gitk)
+            Git(format-patch)
+            Git(send-email)
+            Git(apply)
+            Git(am)
+            Git(request-pull)
+            Git(svn)
+            Git(fast-import)
+            Git(fast-export)
+            Git(relink)
+            Git(filter-branch)
+            Git(lost-found)
+            Git(daemon)
+            Git(update-server-info)
+            Git(pack-refs)
+            Git(prune)
+            Git(prune-packed)
+            Git(repack)
+            Git(pack-objects)
+            Git(unpack-objects)
+            Git(verify-pack)
+            Git(verify-tag)
+            Git(cat-file)
+            Git(commit-tree)
+            Git(hash-object)
+            Git(merge-base)
+            Git(name-rev)
+            Git(pack-redundant)
+            Git(patch-id)
+            Git(rev-list)
+            Git(rev-parse)
+            Git(show-index)
+            Git(show-ref)
+            Git(symbolic-ref)
+            Git(unpack-file)
+            Git(var)
+            Git(whatchanged)
+            Git(ls-files)
+            Git(ls-tree)
+            Git(ls-remote)
+            Git(show-branch)
+            Git(merge-tree)
+            Git(rerere)
+            Git(rev-tree)
+            Git(shortlog)
+            Git(describe)
+            Git(reflog)
+            Git(instaweb)
+            Git(archive)
+            Git(bundle)
+            Git(fsck)
+            Git(gc)
+            Git(maintenance)
+            Git(notes)
+            Git(worktree)
+            FileSystem(readFile)
+            FileSystem(writeFile)
+            FileSystem(appendFile)
+            FileSystem(readdir)
+            FileSystem(mkdir)
+            FileSystem(rmdir)
+            FileSystem(rm)
+            FileSystem(stat)
+            FileSystem(exists)
+            FileSystem(copy)
+            FileSystem(move)
+            FileSystem(rename)
+            FileSystem(chmod)
+            FileSystem(chown)
+            FileSystem(link)
+            FileSystem(symlink)
+            FileSystem(readlink)
+            FileSystem(realpath)
+            FileSystem(glob)
+            FileSystem(watch)
+            FileSystem(unwatch)
+            Write(file)
+            Write(append)
+            Write(create)
+            Write(overwrite)
+            Write(binary)
+            Write(text)
+            Write(json)
+            Write(yaml)
+            Write(xml)
+            Write(csv)
+            Write(markdown)
+            Write(html)
+            Write(css)
+            Write(javascript)
+            Write(typescript)
+            Write(python)
+            Write(bash)
+            Write(shell)
+            Write(config)
+            Write(log)
+            Read(file)
+            Read(text)
+            Read(binary)
+            Read(json)
+            Read(yaml)
+            Read(xml)
+            Read(csv)
+            Read(markdown)
+            Read(html)
+            Read(css)
+            Read(javascript)
+            Read(typescript)
+            Read(python)
+            Read(bash)
+            Read(shell)
+            Read(config)
+            Read(log)
+            Read(directory)
+            Read(recursive)
+            Edit(file)
+            Edit(text)
+            Edit(insert)
+            Edit(replace)
+            Edit(delete)
+            Edit(append)
+            Edit(prepend)
+            Edit(search)
+            Edit(searchReplace)
+            Edit(lineEdit)
+            Edit(blockEdit)
+            Edit(multiEdit)
+            MultiEdit(files)
+            MultiEdit(search)
+            MultiEdit(replace)
+            MultiEdit(insert)
+            MultiEdit(delete)
+            MultiEdit(batch)
+            MultiEdit(pattern)
+            MultiEdit(regex)
+            MultiEdit(global)
+            Glob(pattern)
+            Glob(recursive)
+            Glob(files)
+            Glob(directories)
+            Glob(hidden)
+            Glob(ignore)
+            Glob(include)
+            Glob(exclude)
+            Glob(case)
+            Glob(absolute)
+            Glob(relative)
+            Grep(search)
+            Grep(pattern)
+            Grep(regex)
+            Grep(file)
+            Grep(directory)
+            Grep(recursive)
+            Grep(case)
+            Grep(word)
+            Grep(line)
+            Grep(count)
+            Grep(context)
+            Grep(before)
+            Grep(after)
+            Grep(invert)
+            Grep(binary)
+            Grep(exclude)
+            Grep(include)
+            LS(directory)
+            LS(recursive)
+            LS(all)
+            LS(long)
+            LS(human)
+            LS(time)
+            LS(size)
+            LS(sort)
+            LS(reverse)
+            LS(classify)
+            LS(color)
+            LS(format)
+            LS(group)
+            LS(owner)
+            LS(permissions)
+            LS(hidden)
+            LS(directories)
+            LS(files)
           
-          # Custom instructions for Claude to use full capabilities
           custom_instructions: |
-            You have full access to:
-            - Read and write files using FileSystem tools
-            - Execute bash commands including ls, curl, find, grep, etc.
-            - Full git operations including checkout, fetch, merge, rebase
-            - Create, switch, and manage branches
-            - Push changes and create pull requests
-            - Read repository metadata and project information
-            - Modify workflow files (you have workflows permission via PAT)
+            You have been granted the following permissions:
+            
+            BASH ACCESS: You can execute bash commands including:
+            - ls, pwd, whoami, echo, cat, grep, find, curl
+            - All git commands (git status, git add, git commit, git push, git checkout, git fetch, git branch, etc.)
+            - File operations (mkdir, rm, mv, cp, chmod)
+            - System commands (ps, df, du, which, whereis)
+            
+            GIT ACCESS: Full git repository access including:
+            - Branch operations (checkout, create, switch, merge)
+            - Commit operations (add, commit, push, pull)
+            - Remote operations (fetch, push, pull)
+            - History operations (log, diff, show)
+            
+            FILE ACCESS: Complete file system access:
+            - Read any file in the repository
+            - Write/create new files
+            - Edit existing files
+            - Delete files (use with caution)
+            
+            WORKFLOW:
+            1. Always test bash access first with simple commands
+            2. Use git commands to explore repository structure
+            3. Make changes as requested
+            4. Commit and push changes to remote branch
+            5. Provide clear status updates
+            
+            IMPORTANT: You are expected to:
+            - Execute bash commands to complete tasks
+            - Use git operations freely
+            - Create, modify, and delete files as needed
+            - Always push your changes to the remote repository
             
             Git configuration:
-            - User name: Claude Code
-            - User email: claude@anthropic.com
-            - Authentication is pre-configured with GitHub PAT
+            - User: Claude Code <claude@anthropic.com>
+            - Authentication: Pre-configured with GitHub token
             
-            Best practices:
-            - Always create feature branches for changes
-            - Use descriptive commit messages
-            - Test changes before committing
-            - Follow the project's coding standards
-          
-          # Environment variables for enhanced functionality
           claude_env: |
             NODE_ENV=development
             GIT_AUTHOR_NAME=Claude Code
             GIT_AUTHOR_EMAIL=claude@anthropic.com
             GIT_COMMITTER_NAME=Claude Code
             GIT_COMMITTER_EMAIL=claude@anthropic.com
-            GITHUB_TOKEN=${{ secrets.CLAUDE_PAT }}
-            PATH=/usr/local/bin:/usr/bin:/bin
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+            PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin
             SHELL=/bin/bash
+            TERM=xterm-256color
